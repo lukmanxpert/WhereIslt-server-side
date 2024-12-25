@@ -23,10 +23,16 @@ async function run() {
       res.send("Hello World!");
     });
 
+    app.get("/latest-posts", async (req, res) => {
+      const cursor = allPosts.find({}).sort({ date: -1 }).limit(6);
+      const latestPosts = await cursor.toArray();
+      res.send(latestPosts);
+    });
+
     app.post("/posts", async (req, res) => {
-        const newPost = req.body;
-        const result = await allPosts.insertOne(newPost);
-        res.json(result);
+      const newPost = req.body;
+      const result = await allPosts.insertOne(newPost);
+      res.json(result);
     });
 
     app.get("/posts", async (req, res) => {
