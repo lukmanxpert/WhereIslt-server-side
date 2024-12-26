@@ -31,10 +31,17 @@ async function run() {
     });
 
     app.get("/jobs", async (req, res) => {
-        const cursor = allPosts.find();
-        const result = await cursor.toArray();
-        res.send(result);
-      });
+      const cursor = allPosts.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/my-items/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { "contactInfo.email": email };
+      const items = await allPosts.find(query).toArray();
+      res.send(items);
+    });
 
     app.post("/posts", async (req, res) => {
       const newPost = req.body;
