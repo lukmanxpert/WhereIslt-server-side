@@ -43,6 +43,13 @@ async function run() {
       res.send(items);
     });
 
+    app.get("/user-recovered-items/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { "contactInfo.email": email, recovered: true };
+      const items = await allPosts.find(query).toArray();
+      res.send(items);
+    });
+
     app.post("/posts", async (req, res) => {
       const newPost = req.body;
       const result = await allPosts.insertOne(newPost);
