@@ -68,6 +68,19 @@ async function run() {
       res.send(result);
     });
 
+    app.put("/update-item/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const data = req.body;
+      const updated = {
+        $set: data,
+      };
+      const options = { upsert: true };
+      const result = await allPosts.updateOne(query, updated, options);
+      console.log(data);
+      res.send(result);
+    });
+
     app.delete("/delete-item/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(req.params.id) };
