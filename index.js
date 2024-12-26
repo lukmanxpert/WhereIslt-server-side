@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
 app.use(cors());
@@ -18,6 +18,7 @@ async function run() {
   try {
     const database = client.db("whereislt");
     const allPosts = database.collection("posts");
+    const recoveredPosts = database.collection("recoveredPosts");
 
     app.get("/", (req, res) => {
       res.send("Hello World!");
@@ -35,12 +36,36 @@ async function run() {
       res.json(result);
     });
 
+    app.post("/recovered-item", async (req, res) => {
+      const recoveredItem = req.body;
+      const result = await recoveredPosts.insertOne(recoveredItem);
+      res.json(result);
+    });
+
+    app.put("/update-recovered-item/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const data = req.body;
+      const updated = {
+        $set: data,
+      };
+      const options = { upsert: true };
+      const result = await allPosts.updateOne(query, updated, options);
+      console.log(data);
+      res.send(result);
+    });
+
     app.get("/posts", async (req, res) => {
       const cursor = allPosts.find({});
       const posts = await cursor.toArray();
       res.send(posts);
     });
 
+    app.get("/posts/:id", async (req, res) => {
+      const id = req.params.id;
+      const post = await allPosts.findOne({ _id: new ObjectId(id) });
+      res.send(post);
+    });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
