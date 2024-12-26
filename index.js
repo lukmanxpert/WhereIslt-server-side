@@ -30,6 +30,12 @@ async function run() {
       res.send(latestPosts);
     });
 
+    app.get("/jobs", async (req, res) => {
+        const cursor = allPosts.find();
+        const result = await cursor.toArray();
+        res.send(result);
+      });
+
     app.post("/posts", async (req, res) => {
       const newPost = req.body;
       const result = await allPosts.insertOne(newPost);
