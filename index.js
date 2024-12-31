@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -22,6 +23,13 @@ async function run() {
 
     app.get("/", (req, res) => {
       res.send("Hello World!");
+    });
+
+    app.post("/login", async (req, res) => {
+      const email = req.body.email;
+      const token = jwt.sign( email , process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
     });
 
     app.get("/latest-posts", async (req, res) => {
