@@ -4,8 +4,17 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const app = express();
-app.use(cors());
+const cookieParser = require("cookie-parser");
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
+app.use(cookieParser());
+
 const port = process.env.PORT || 9000;
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.l73rt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 const client = new MongoClient(uri, {
@@ -25,11 +34,24 @@ async function run() {
       res.send("Hello World!");
     });
 
-    app.post("/login", async (req, res) => {
-      const email = req.body.email;
-      const token = jwt.sign( email , process.env.JWT_SECRET, {
-        expiresIn: "1h",
-      });
+    app.post("/jwt", async (req, res) => {
+      try {
+        const user = req.body;
+        req.user = user;
+        if (!user.email) {
+          return res.send("give user credentials");
+        }
+        const token = jwt.sign(user, process.env.SECRET_KEY, {
+          expiresIn: "7d",
+        });
+        res.cookie("token", token);
+        res.json({ token });
+      } catch (error) {
+        res.send({
+          message: error.message || error,
+          error: true,
+        });
+      }
     });
 
     app.get("/latest-posts", async (req, res) => {
