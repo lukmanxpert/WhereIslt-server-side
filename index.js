@@ -5,6 +5,11 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const app = express();
 const cookieParser = require("cookie-parser");
+const cookieOption = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+};
 
 app.use(
   cors({
@@ -44,7 +49,7 @@ async function run() {
         const token = jwt.sign(user, process.env.SECRET_KEY, {
           expiresIn: "7d",
         });
-        res.cookie("token", token);
+        res.cookie("token", token, cookieOption);
         res.json({ token });
       } catch (error) {
         res.send({
@@ -52,6 +57,11 @@ async function run() {
           error: true,
         });
       }
+    });
+
+    app.post("/logout", (req, res) => {
+      res.clearCookie("token", cookieOption);
+      return res.send("logout done")
     });
 
     app.get("/latest-posts", async (req, res) => {
