@@ -5,6 +5,8 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const app = express();
 const cookieParser = require("cookie-parser");
+const auth = require("./middleware/auth.js");
+
 const cookieOption = {
   httpOnly: true,
   secure: true,
@@ -61,7 +63,7 @@ async function run() {
 
     app.post("/logout", (req, res) => {
       res.clearCookie("token", cookieOption);
-      return res.send("logout done")
+      return res.send("logout done");
     });
 
     app.get("/latest-posts", async (req, res) => {
@@ -141,10 +143,21 @@ async function run() {
       res.send(posts);
     });
 
-    app.get("/posts/:id", async (req, res) => {
-      const id = req.params.id;
-      const post = await allPosts.findOne({ _id: new ObjectId(id) });
-      res.send(post);
+    app.get("/posts/:id", auth, async (req, res) => {
+      try {
+        const id = req.params.id;
+        if (!id) {
+          return res.send("Post not found.");
+        }
+        const post = await allPosts.findOne({ _id: new ObjectId(id) });
+        res.send(post);
+      } catch (error) {
+        return res.status(501).json({
+          message: error.message || error,
+          error: true,
+          success: false,
+        });
+      }
     });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
